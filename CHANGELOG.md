@@ -1,3 +1,53 @@
+# Changelog
+
+Notable changes to seleCte, following [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
+The repository's history starts at the first public release, so this file is the record
+of everything before it.
+
+## [0.10.0] - 2026-10-12
+
+First public release.
+
+### Fixed
+
+- Level generation no longer hangs. Exit coordinates were converted between absolute and
+  room-local positions in three places that disagreed, so placing the spawn or the
+  crystal heart could fail on every attempt, and the retry loop never gave up. The
+  conversion now lives in one place.
+- Horizontally connected rooms carved their halves of a shared doorway at different
+  heights.
+- Every retry loop is bounded, so a run always terminates, and reports when what it
+  wrote is suspect.
+
+### Changed
+
+- Only rooms on the route from the starting room to the ending room are held to the
+  playability check. Rooms on side branches are filled once and not retried, so levels
+  are no longer thrown away over rooms the player never has to cross.
+- The README is rewritten around a quickstart, with the technical detail moved to
+  `docs/how-it-works.md`.
+- The license names the author, Louis Robinet, for 2022 to 2026.
+
+### Added
+
+- `Celeskeleton.get_traversal_path` and `get_room_graph`, which read a level's route and
+  room adjacency off its exits, and `Room.is_connected_to`.
+- `CITATION.cff`, so GitHub's *Cite this repository* button gives the paper.
+
+### Removed
+
+- All extracted Celeste level data. Extract it from your own copy of the game instead;
+  the README explains how.
+- `ipykernel`, unused since the notebooks were removed, along with its dependencies,
+  including `tornado`.
+
+## [0.9.0] - 2026-08-04
+
+### Added
+
+- Background tile generation, through the existing pipeline with a `--layer {fg,bg}`
+  flag: corpus building in `preprocessing/collect_bg_rooms.py`, training and sampling.
+  Train background models one chapter at a time, since each chapter uses one tileset.
 - A CI job that encodes a level end to end in Julia, `tests/julia_smoke.jl`.
 
 ### Changed
