@@ -1,0 +1,80 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  quality:
+    name: Lint & format
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}
+      - run: uvx pre-commit run --all-files --show-diff-on-failure
+
+  types:
+    name: Type check (mypy gate)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked --all-groups
+      - run: uv run mypy --no-pretty --num-workers 4
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+      - run: uv sync --locked --all-groups
+      - run: uv run pytest -q --junitxml=junit.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pytest-results
+          path: junit.xml
+
+  julia:
+    name: Julia round-trip
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: julia-actions/setup-julia@v2
+        with:
+          # The minor the committed Manifest was resolved for. Not pinned to a patch:
+          # patch releases share a stdlib set, so the Manifest stays valid across them
+          # and this does not need bumping in lockstep.
+          version: '1.12'
+      - uses: julia-actions/cache@v2
+      # Resolves Project.toml + Manifest.toml, which means cloning the pinned Maple
+      # fork. A failure here is the pin itself being unreachable or unresolvable.
+      - run: julia --project=. -e 'using Pkg; Pkg.instantiate()'
+      # `instantiate` rewrites the Manifest when it disagrees with Project.toml, so a
+      # dirty file means the committed lock is stale and the pin is not what it claims.
+      - run: git diff --exit-code Manifest.toml
+      - run: julia --project=. tests/julia_smoke.jl

@@ -1,0 +1,62 @@
+# Julia environment for the two scripts that talk to Celeste's binary map format:
+#
+#   src/seleCte/data_loader/data_loader.jl     .bin      -> csv/json room dumps
+#   src/seleCte/room_encoder/data_to_level.jl  csv/json  -> .bin
+#
+# Both are run with `--project` pointed here, from the repo root:
+#
+#   julia --project=. src/seleCte/data_loader/data_loader.jl <maps-dir> [out-dir]
+#
+# and once, to resolve the pins into a Manifest.toml:
+#
+#   julia --project=. -e 'using Pkg; Pkg.instantiate()'
+#
+# This replaces the `Pkg.add(PackageSpec(url=...))` that used to run on every
+# invocation of the encoder, which re-resolved Maple against whatever master
+# happened to be that day.
+
+[deps]
+DelimitedFiles = "8bb1440f-4735-579b-a4ab-409b98df4dab"
+JSON = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
+Maple = "90d5db4a-9bb6-11e8-1220-8362fcebe760"
+
+# Maple is not in the General registry, so it needs an explicit source. This is
+# the one knob to turn when swapping fork for upstream: only the `[sources]`
+# entry changes, `[deps]` stays put - it is the same package and the same UUID
+# either way, so nothing in the scripts has to know which one is loaded.
+#
+# Pinned to a commit rather than a branch, so a push to the fork cannot silently
+# change what a dump or an encode produces.
+#
+# This is the project's fork, not upstream, and it has to be: upstream's
+# `default_entity_map` has no `'H' => CrystalHeart`, so upstream cannot encode the
+# crystal heart, and `celeskeleton` puts exactly one in the end room as the thing
+# that finishes a generated level. Encoding against upstream silently drops it and
+# ships an uncompletable level. The fork also sets `HeartIsEnd` in `default_mode`,
+# which is what makes collecting the heart end the chapter rather than just pocket
+# a collectible - `data_to_level.jl` merges that in via `chapter_metadata`.
+[sources]
+Maple = {url = "https://github.com/robilouis/Maple.git", rev = "35bca209b01f4079727edd0b0c06882f17223690"}
+
+# To move the pin, push to the fork and put the new commit above, or while actually
+# working on it point at a checkout sitting next to this repo:
+#
+#   Maple = {path = "../Maple"}
+#
+# and re-run `Pkg.instantiate()`. Upstream is
+# https://github.com/CelestialCartographers/Maple.git, last used at
+# 72e9b8de4c0efc71b142b681f414454b560ed094; the scripts still run against it, just
+# without a heart and with `HeartIsEnd` false.
+#
+# Still missing on both sides: `L` (lightbeam) has no glyph either, but it is
+# decoration and can stay lost. Springs are the queued work and the expensive half -
+# they cost a symbol choice and a corpus rebuild, not just a fork line.
+# See src/seleCte/room_encoder/ALPHABET.md.
+
+[compat]
+DelimitedFiles = "1"
+# Maple declares no [compat] of its own, so nothing stops Pkg from resolving the
+# JSON 1.x rewrite against a library written against the 0.21 API. Hold it back.
+JSON = "0.21"
+# `[sources]` in Project.toml is 1.11+.
+julia = "1.11"

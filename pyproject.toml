@@ -1,0 +1,110 @@
+[project]
+name = "seleCte"
+version = "0.9.0"
+description = "Procedural Content Generation pipeline applied to Celeste level generation by robilouis - a Master Thesis project"
+readme = "README.md"
+requires-python = ">= 3.14"
+authors = [
+    {name = "Louis Robinet", email = "louisrobi@hotmail.fr"},
+]
+license = {file = "LICENSE"}
+dependencies = [
+    "ipykernel>=6.29.5",
+    "jinja2>=3.1.6",
+    "matplotlib>=3.9.2",
+    "numpy>=2.0.2",
+    "pandas>=2.3.3",
+]
+
+[build-system]
+requires = ["uv_build>=0.8.17,<0.9.0"]
+build-backend = "uv_build"
+
+[tool.uv.build-backend]
+module-name = "seleCte"
+
+[dependency-groups]
+lint = [
+    "mypy>=2.3.0",
+    "ruff>=0.16.0",
+    "ty>=0.0.64",
+    "pandas-stubs>=3.0.3.260530",
+]
+test = [
+    "pytest>=9.1.1",
+]
+dev = [
+    {include-group = "lint"},
+    {include-group = "test"},
+]
+
+# ---- ruff: the format guard ----
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+  "E", "W",    # pycodestyle
+  "F",         # pyflakes
+  "I",         # isort (import sorting)
+  "N",         # pep8-naming
+  "UP",        # pyupgrade — modernize syntax to your target-version
+  "B",         # flake8-bugbear — real bug patterns
+  "SIM",       # flake8-simplify
+  "C4",        # comprehensions
+  "ARG",       # unused arguments
+  "PTH",       # prefer pathlib over os.path
+  "RUF",       # ruff-specific
+  "D",         # pydocstyle — only if you actually want enforced docstrings
+  "ANN",       # flake8-annotations — forces annotations everywhere
+  "S",         # bandit security rules
+]
+ignore = [
+  "D203",  # mutually-exclusive docstring rules
+  "D213",  # mutually-exclusive docstring rules
+  "S311",  # random generators used for size, no security tokens involved
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["S101", "D", "ANN"]  # asserts and undocumented tests are fine
+"**/*.ipynb" = ["D", "ANN"]
+"**/__init__.py" = ["N999"]  # `seleCte` is the project's name, capital C included
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+# ---- mypy: the CI gate ----
+[tool.mypy]
+python_version = "3.14"
+mypy_path = "src"
+files = ["src"]
+strict = true
+warn_unreachable = true
+pretty = true
+
+[[tool.mypy.overrides]]
+module = ["untyped_dep.*"]
+ignore_missing_imports = true
+
+# ---- ty: the local fast loop ----
+[tool.ty.environment]
+python-version = "3.14"
+root = ["./src"]
+
+[tool.ty.src]
+include = ["src"]
+# Notebooks are scratch space: they either graduate into a proper module or get
+# deleted. Type-checking them just yields noise about names defined in a cell
+# ty does not consider in scope.
+exclude = ["**/*.ipynb"]
+
+[tool.ty.terminal]
+error-on-warning = true
+
+[tool.ty.rules]
+unused-ignore-comment = "warn"

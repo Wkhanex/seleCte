@@ -1,0 +1,45 @@
+cff-version: 1.2.0
+message: >-
+  If you use seleCte in your research, please cite the FDG 2025 paper below
+  rather than the software itself.
+title: seleCte
+abstract: >-
+  Procedural generation of playable Celeste levels. A multi-dimensional Markov
+  chain trained on the tile patterns of the game's own rooms fills the rooms of a
+  procedurally drawn level skeleton, which is then encoded back into a binary map
+  the game can load.
+type: software
+authors:
+  - given-names: Louis
+    family-names: Robinet
+repository-code: "https://github.com/robilouis/seleCte"
+license: MIT
+version: 0.9.0
+keywords:
+  - procedural content generation
+  - level generation
+  - platformer
+  - markov chain
+  - game ai
+  - celeste
+preferred-citation:
+  type: conference-paper
+  title: >-
+    Towards a Celeste AI Framework: Agent-free Automated 2D Level Generation for
+    Multidirectional Platformers
+  authors:
+    - given-names: Louis
+      family-names: Robinet
+    - given-names: Marcello A.
+      family-names: Gómez-Maureira
+    - given-names: Mike
+      family-names: Preuss
+  collection-title: >-
+    FDG '25: Proceedings of the 20th International Conference on the Foundations
+    of Digital Games
+  collection-type: proceedings
+  conference:
+    name: >-
+      20th International Conference on the Foundations of Digital Games
+  year: 2025
+  doi: 10.1145/3723498.3723796

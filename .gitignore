@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# uv
+.venv/
+
+# Tool caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Build output
+dist/
+
+# Julia script output - default destinations of data_loader.jl and
+# data_to_level.jl when no output directory is given.
+/levels/
+/generated_bin_files/
+
+# Secrets
+.env
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Generated training corpora - derived from the game, not shipped. Rebuild with
+# `uv run python -m seleCte.pcg.preprocessing.recombine_fg_entities` and
+# `uv run python -m seleCte.pcg.preprocessing.collect_bg_rooms`
+src/seleCte/pcg/preprocessing/data_pcg_ready/all_rooms/*
+!src/seleCte/pcg/preprocessing/data_pcg_ready/all_rooms/.gitkeep
+src/seleCte/pcg/preprocessing/data_pcg_ready/all_rooms_bg/*
+!src/seleCte/pcg/preprocessing/data_pcg_ready/all_rooms_bg/.gitkeep
+
+# Extracted game data - not ours to redistribute, so it is never committed. Dump it
+# from your own copy of Celeste with
+# `julia --project=. src/seleCte/data_loader/data_loader.jl "<Celeste>/Content/Maps" \
+#     src/seleCte/data/levels/original`
+# See the "Retraining the model" section of the README.
+src/seleCte/data/levels/original/
+
+# Coverage output
+.coverage
+htmlcov/
+
+# Agent working notes - kept local, not part of the published project. The
+# durable parts were moved into the code and the issue tracker: the playability
+# baseline decision is on `utils.astar`, the rework design is issue #47.
+.claude/
